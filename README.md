@@ -1,11 +1,33 @@
 <h1 align="center">
-  Hi there, I'm <a href="https://github.com/tima03/" target="_blank">Valeria Shlykova (known as Elka)</a>
+  Привет, я <a href="https://github.com/tima03/" target="_blank">Валерия Шлыкова (Elka)</a>
   <img src="https://github.com/blackcater/blackcater/raw/main/images/Hi.gif" height="32"/>
 </h1>
-<h3 align="center">Computer science student, IT news writer from Russia 🇷🇺</h3>
+<h3 align="center">Студент компьютерных наук, IT-журналист из России 🇷🇺</h3>
 
-<h1>SuperAdminBot</h1>
+<h1 align="center">SuperAdminBot</h1>
 
-<p>A good open-source telegram bot for chats made with telephone and aiogram api. Bot can Ban, Mute, Get|Post userid, Get|Post username in live working state and add all necessary information into PostgreSQL database.</p>
+<p align="center">
+  <em>Первоклассный open-source Telegram бот для управления чатами, созданный с использованием API Telethon и Aiogram.</em>
+</p>
 
-<p><strong>use <code>pip install -r requirements.txt</code> firstly</strong></p>
+<p>
+  SuperAdminBot предоставляет возможность:
+  <ul>
+    <li>Блокировать пользователей (Ban)</li>
+    <li>Замечать пользователей (Mute)</li>
+    <li>Получать и публиковать идентификатор пользователя</li>
+    <li>Получать и публиковать имя пользователя в режиме реального времени</li>
+  </ul>
+  Вся информация автоматически сохраняется в базу данных PostgreSQL, обеспечивая удобное и надежное управление данными.
+</p>
+
+<p><strong>Для установки зависимостей выполните: <code>pip install -r requirements.txt</code></strong></p>
+
+<p align="center">
+  <a href="https://github.com/tima03/SuperAdminBot" target="_blank">
+    <img src="https://img.shields.io/github/stars/tima03/SuperAdminBot?style=social" alt="GitHub stars"/>
+  </a>
+  <a href="https://github.com/tima03/SuperAdminBot/fork" target="_blank">
+    <img src="https://img.shields.io/github/forks/tima03/SuperAdminBot?style=social" alt="GitHub forks"/>
+  </a>
+</p>
