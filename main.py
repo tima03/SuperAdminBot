@@ -124,5 +124,59 @@ async def sms_delete(event):
         await client.delete_messages(event.chat_id, event.message.id)
 
 
+@client.on(events.NewMessage(pattern=re.compile(r'ban\s+@(\w+)', re.IGNORECASE)))
+async def sms_delete(event):
+    user_id = event.message.to_dict()['from_id']['user_id']
+    permissions = await client.get_permissions(event.chat_id, user_id)
+    if permissions.is_admin:
+        find_nick_message = re.search(r'ban\s+@(\w+)', event.message.text, re.IGNORECASE)
+        if find_nick_message:
+            nick_massage = find_nick_message.group(1)
+            if nick_massage.isalnum():
+                if nick_massage.isdigit():
+                    try:
+                        await bot.ban_chat_member(event.chat_id, nick_massage)
+                        await event.respond(nick_massage + " is banned")
+                    except Exception:
+                        await event.respond("Видимо такого ника или id не существует")
+                else:
+                    try:
+                        user_toban = await client.get_entity(nick_massage)
+                        await bot.ban_chat_member(event.chat_id, user_toban.id)
+                        await event.respond(nick_massage + " is banned")
+                    except Exception:
+                        await event.respond("Видимо такого ника или id не существует")
+            else:
+                await event.respond("Nickname can contain only latter's and digits")
+        else:
+            await event.respond("No nickname found in the text")
+
+@client.on(events.NewMessage(pattern=re.compile(r'unban\s+@(\w+)', re.IGNORECASE)))
+async def sms_delete(event):
+    user_id = event.message.to_dict()['from_id']['user_id']
+    permissions = await client.get_permissions(event.chat_id, user_id)
+    if permissions.is_admin:
+        find_nick_message = re.search(r'unban\s+@(\w+)', event.message.text, re.IGNORECASE)
+        if find_nick_message:
+            nick_massage = find_nick_message.group(1)
+            if nick_massage.isalnum():
+                if nick_massage.isdigit():
+                    try:
+                        await bot.unban_chat_member(event.chat_id, nick_massage)
+                        await event.respond(nick_massage + " is unbanned")
+                    except Exception:
+                        await event.respond("Видимо такого ника или id не существует")
+                else:
+                    try:
+                        user_toban = await client.get_entity(nick_massage)
+                        await bot.unban_chat_member(event.chat_id, user_toban.id)
+                        await event.respond(nick_massage + " is unbanned")
+                    except Exception:
+                        await event.respond("Видимо такого ника или id не существует")
+            else:
+                await event.respond("Nickname can contain only latter's and digits")
+        else:
+            await event.respond("No nickname found in the text")
+
 client.start()
 client.run_until_disconnected()
