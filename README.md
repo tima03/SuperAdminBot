@@ -42,21 +42,21 @@ from db_handler.db_class import PostgresHandler
 from aiogram import Bot, Dispatcher
 from aiogram.types import ChatMemberRestricted, ChatMemberBanned
 
-<h3>Инициализация хендлера для базы данных по ссылке из .env</h3>
+<h3 algin="center">Инициализация хендлера для базы данных по ссылке из .env</h3>
 pg_db = PostgresHandler(config('PG_LINK'))
 
-<h3>Инициализация клиента Telegram apps api (Telethon) и бота telegram api (aiogram)</h3>
+<h3 algin="center">Инициализация клиента Telegram apps api (Telethon) и бота telegram api (aiogram)</h3>
 client = TelegramClient('bot', api_id, api_hash)
 bot = Bot(token=bot_token)
 dp = Dispatcher(bot)
 
-<h3>Пример использования Telethon для получения информации о пользователях</h3>
+<h3 algin="center">Пример использования Telethon для получения информации о пользователях</h3>
 @client.on(events.NewMessage(pattern='/start'))
 async def start(event):
     await event.respond('Привет! Я SuperAdminBot. Как я могу помочь вам сегодня?')
     raise events.StopPropagation
 
-<h3>Обработка действий в чате</h3>
+<h3 algin="center">Обработка действий в чате</h3>
 @client.on(events.ChatAction(chats='your_chat'))
 async def handle_chat_action(event):
     if event.user_joined or event.user_left:
