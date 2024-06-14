@@ -29,6 +29,7 @@
 API_ID=0000000000 #Telegram apps API_ID that you can get at https://my.telegram.org/auth?to=apps
 API_HASH='39432jksdsdskjd333mnmn300' #Telegram apps API_HASH that you can get at https://my.telegram.org/auth?to=apps
 API_TOKEN='000000000:ANsdnsdnNSDNdnnsdnsndSNDn' #Your bot token that you can get at @BotFather
+CHAT_NAME='trapfestchat' #Just your chat name where your bot will used to. For my one it is @trapfestchat
 </code></pre>
 
 <h2>Основные функции и импорты:</h2>

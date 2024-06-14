@@ -84,10 +84,16 @@ def insert_new_user_in_db(user_id, user_name, user_is_admin, user_is_muted, user
             print("[INFO] Error adding user to the database")
 
 
-@client.on(events.ChatAction(chats='trapfestchat'))
+@client.on(events.ChatAction(chats=config('CHAT_NAME')))
 async def handle_chat_action(event):
+    if event.user_joined:
+        user = await event.get_user()
+        await event.respond(f"Приветствуем тебя, {user.username or user.id}!")
+    if event.user_left:
+        user = await event.get_user()
+        await event.respond(f"Прощаемся с тобой, {user.username or user.id}!")
     if event.user_joined or event.user_left:
-        users = await client.get_participants('trapfestchat')
+        users = await client.get_participants(config('CHAT_NAME'))
         for user in users:
             if user.username is None:
                 user.username = str(user.id)
@@ -104,6 +110,11 @@ async def handle_chat_action(event):
                         temp_user_details['is_muted'] != is_muted or
                         temp_user_details['is_banned'] != is_banned):
                     update_user_in_db(user.id, user.username, is_admin, is_muted, is_banned)
+
+
+@client.on(events.NewMessage(pattern='hello'))
+async def handler(event):
+    await event.reply('Hey!')
 
 
 client.start()
