@@ -63,7 +63,7 @@ async def start(event):
 
 @client.on(events.ChatAction(chats='your_chat'))
 async def handle_chat_action(event):
-    if event.user_joined или event.user_left:
+    if event.user_joined or event.user_left:
         users = await client.get_participants('your_chat')
         for user in users:
             if user.username is None:
