@@ -21,7 +21,7 @@
 </p>
 
 <p><strong>Для установки зависимостей выполните: <code>pip install -r requirements.txt</code></strong></p>
-<p><strong>Далее в файле .env настройте все необходимые API: <code>
+<p><strong>Далее корне создайте файл с именем .env и настройте все необходимые API, как показано тут: <code>
 PG_LINK=postgresql://username:password*@host:port/database #PostgreSQL link to your Database
 API_ID=0000000000 #Telegram apps API_ID that u can get at https://my.telegram.org/auth?to=apps
 API_HASH='39432jksdsdskjd333mnmn300' #Telegram apps API_HASH that u can get at https://my.telegram.org/auth?to=apps
