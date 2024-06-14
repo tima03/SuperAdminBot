@@ -2,7 +2,7 @@
   Привет, я <a href="https://github.com/tima03/" target="_blank">Валерия Шлыкова (Elka)</a>
   <img src="https://github.com/blackcater/blackcater/raw/main/images/Hi.gif" height="32"/>
 </h1>
-<h3 align="center">Студент компьютерных наук, IT-журналист из России 🇷🇺</h3>
+<h3 align="center">Студент компьютерных наук, блогер и стример из России 🇷🇺</h3>
 
 <h1 align="center">SuperAdminBot</h1>
 
