@@ -34,6 +34,8 @@ API_TOKEN='000000000:ANsdnsdnNSDNdnnsdnsndSNDn' #Your bot token that you can get
 <h2>Основные функции и импорты:</h2>
 <p>Вот фрагмент кода из <code>main.py</code>, показывающий основные функции и импорты бота:</p>
 <pre><code>
+Основные импорты:
+
 from telethon import TelegramClient, events
 import logging
 from decouple import config
