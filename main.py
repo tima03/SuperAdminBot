@@ -5,91 +5,105 @@ from db_handler.db_class import PostgresHandler
 from aiogram import Bot, Dispatcher
 from aiogram.types import ChatMemberRestricted, ChatMemberBanned
 
+# Initialize the database handler
 pg_db = PostgresHandler(config('PG_LINK'))
-# scheduler = AsyncIOScheduler(timezone='Europe/Moscow')
-# admins = [int(admin_id) for admin_id in config('ADMINS').split(',')]
 
+# Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# Initialize Telegram client and bot
 client = TelegramClient('phoneTest', config('API_ID'), config('API_HASH')).start(bot_token=config('API_TOKEN'))
-
-
 bot = Bot(token=config('API_TOKEN'))
 dp = Dispatcher()
 
-def CheckIfUserIdInDB(user_ID):
-    global temp_user_name
-    global temp_user_isadmin
-    global temp_user_ismuted
-    global temp_user_isbanned
-    if pg_db.connect_by_link(): print("БД подключена")
+# Temporary user details
+temp_user_details = {
+    'name': None,
+    'is_admin': None,
+    'is_muted': None,
+    'is_banned': None
+}
+
+
+def check_user_in_db(user_id):
+    global temp_user_details
+    if pg_db.connect_by_link():
+        print("Database connected")
     try:
-        pg_db.cursor.execute("""SELECT * FROM users WHERE userid = %s;""", [user_ID])
+        pg_db.cursor.execute("""SELECT * FROM users WHERE userid = %s;""", [user_id])
         record = pg_db.cursor.fetchone()
         if record is None:
-            if pg_db.disconnect(): print("БД отключена")
+            if pg_db.disconnect():
+                print("Database disconnected")
             return False
         else:
-            temp_user_name = record[1]
-            temp_user_isadmin = record[2]
-            temp_user_ismuted = record[3]
-            temp_user_isbanned = record[4]
-            if pg_db.disconnect(): print("БД отключена")
+            temp_user_details['name'] = record[1]
+            temp_user_details['is_admin'] = record[2]
+            temp_user_details['is_muted'] = record[3]
+            temp_user_details['is_banned'] = record[4]
+            if pg_db.disconnect():
+                print("Database disconnected")
             return True
-    except Exception as _ex:
-        if pg_db.disconnect(): print("[INFO] Ошибка проверки ID пользователя в базе данных")
+    except Exception:
+        if pg_db.disconnect():
+            print("[INFO] Error checking user ID in the database")
         return False
 
 
-def UpdateUserInDatabase(user_ID, user_NAME, user_ISADMIN, user_ISMUTED, user_ISBANNED):
-    if pg_db.connect_by_link(): print("БД подключена")
+def update_user_in_db(user_id, user_name, user_is_admin, user_is_muted, user_is_banned):
+    if pg_db.connect_by_link():
+        print("Database connected")
     pg_db.conn.autocommit = True
-    sql_insert_query = """UPDATE users SET username = %s, userisadmin = %s,userismuted = %s, userisbanned = %s WHERE 
+    sql_update_query = """UPDATE users SET username = %s, userisadmin = %s, userismuted = %s, userisbanned = %s WHERE 
     userid = %s;"""
-    insert_tuple = (user_NAME, user_ISADMIN, user_ISMUTED, user_ISBANNED, user_ID)
+    update_tuple = (user_name, user_is_admin, user_is_muted, user_is_banned, user_id)
     try:
-        pg_db.cursor.execute(sql_insert_query, insert_tuple)
-        temp_user_name = None
-        temp_user_isadmin = None
-        temp_user_ismuted = None
-        temp_user_isbanned = None
-        if pg_db.disconnect(): print("Бд отключена")
-    except Exception as _ex:
-        if pg_db.disconnect(): print("[INFO] Ошибка обновления данных пользователя в бд")
+        pg_db.cursor.execute(sql_update_query, update_tuple)
+        temp_user_details.update({'name': None, 'is_admin': None, 'is_muted': None, 'is_banned': None})
+        if pg_db.disconnect():
+            print("Database disconnected")
+    except Exception:
+        if pg_db.disconnect():
+            print("[INFO] Error updating user data in the database")
 
 
-def InsertNewUserInDB(user_ID, user_NAME, user_ISADMIN, user_ISMUTED, user_ISBANNED):
-    if pg_db.connect_by_link(): print("БД подключена")
+def insert_new_user_in_db(user_id, user_name, user_is_admin, user_is_muted, user_is_banned):
+    if pg_db.connect_by_link():
+        print("Database connected")
     pg_db.conn.autocommit = True
     sql_insert_query = """INSERT INTO users (userid, username, userisadmin, userismuted, userisbanned) VALUES (%s, 
     %s, %s, %s, %s);"""
-    insert_tuple = (user_ID, user_NAME, user_ISADMIN, user_ISMUTED, user_ISBANNED)
+    insert_tuple = (user_id, user_name, user_is_admin, user_is_muted, user_is_banned)
     try:
         pg_db.cursor.execute(sql_insert_query, insert_tuple)
-        if pg_db.disconnect(): print("БД отключена")
-    except Exception as _ex:
-        if pg_db.disconnect(): print("[INFO] Ошибка добавления пользователя в базу данных")
+        if pg_db.disconnect():
+            print("Database disconnected")
+    except Exception:
+        if pg_db.disconnect():
+            print("[INFO] Error adding user to the database")
 
 
-@client.on(events.ChatAction(chats=('trapfestchat')))
-async def normal_handler(event):
-    if (event.user_joined | event.user_left):
+@client.on(events.ChatAction(chats='trapfestchat'))
+async def handle_chat_action(event):
+    if event.user_joined or event.user_left:
         users = await client.get_participants('trapfestchat')
         for user in users:
-            if user.username == None:
+            if user.username is None:
                 user.username = str(user.id)
             permissions = await client.get_permissions(event.chat_id, user.id)
             member = await bot.get_chat_member(event.chat_id, user.id)
             is_admin = permissions.is_admin
             is_muted = isinstance(member, ChatMemberRestricted)
             is_banned = isinstance(member, ChatMemberBanned)
-            if not CheckIfUserIdInDB(user.id):
-               InsertNewUserInDB(user.id, user.username, permissions.is_admin, is_muted, is_banned)
+            if not check_user_in_db(user.id):
+                insert_new_user_in_db(user.id, user.username, is_admin, is_muted, is_banned)
             else:
-                if temp_user_name != user.username or temp_user_isadmin != is_admin or temp_user_ismuted != is_muted or\
-                        temp_user_isbanned != is_banned:
-                    UpdateUserInDatabase(user.id, user.username, is_admin, is_muted, is_banned)
+                if (temp_user_details['name'] != user.username or
+                        temp_user_details['is_admin'] != is_admin or
+                        temp_user_details['is_muted'] != is_muted or
+                        temp_user_details['is_banned'] != is_banned):
+                    update_user_in_db(user.id, user.username, is_admin, is_muted, is_banned)
 
 
 client.start()
