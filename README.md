@@ -1,3 +1,18 @@
+<style>
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            padding: 10px;
+            overflow: auto;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f8f8f8;
+            padding: 2px 4px;
+            font-size: 90%;
+        }
+</style>
+
 <h1 align="center">
   Привет, я <a href="https://github.com/tima03/" target="_blank">Валерия Шлыкова (Elka)</a>
   <img src="https://github.com/blackcater/blackcater/raw/main/images/Hi.gif" height="32"/>
@@ -25,17 +40,21 @@
 <pre><code>pip install -r requirements.txt</code></pre>
 
 <p><strong>Создайте файл с именем .env и настройте все необходимые API:</strong></p>
-<pre><code>PG_LINK=postgresql://username:password*@host:port/database #PostgreSQL link to your Database
+<pre><code>
+PG_LINK=postgresql://username:password*@host:port/database #PostgreSQL link to your Database
+
 API_ID=0000000000 #Telegram apps API_ID that you can get at https://my.telegram.org/auth?to=apps
+
 API_HASH='39432jksdsdskjd333mnmn300' #Telegram apps API_HASH that you can get at https://my.telegram.org/auth?to=apps
+
 API_TOKEN='000000000:ANsdnsdnNSDNdnnsdnsndSNDn' #Your bot token that you can get at @BotFather
+
 </code></pre>
 
 <h2>Основные функции и импорты:</h2>
 <p>Вот фрагмент кода из <code>main.py</code>, показывающий основные функции и импорты бота:</p>
 <pre><code>
 Основные импорты:
-
 
 from telethon import TelegramClient, events
 import logging
