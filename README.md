@@ -32,18 +32,20 @@ API_HASH='39432jksdsdskjd333mnmn300' #Telegram apps API_HASH that you can get at
 API_TOKEN='000000000:ANsdnsdnNSDNdnnsdnsndSNDn' #Your bot token that you can get at @BotFather
 </code></pre>
 
-<h2>Основные функции</h2>
-<p>Вот фрагмент кода из <code>main.py</code>, показывающий основные функции бота:</p>
+<h2>Основные функции и импорты:</h2>
+<p>Вот фрагмент кода из <code>main.py</code>, показывающий основные функции и импорты бота:</p>
 <pre><code>
 from telethon import TelegramClient, events
-from aiogram import Bot, Dispatcher, executor, types
+import logging
+from decouple import config
+from db_handler.db_class import PostgresHandler
+from aiogram import Bot, Dispatcher
 from aiogram.types import ChatMemberRestricted, ChatMemberBanned
-import asyncio
 
-api_id = 'YOUR_API_ID'
-api_hash = 'YOUR_API_HASH'
-bot_token = 'YOUR_BOT_TOKEN'
+# Инициализация хендлера для базы данных по ссылке из .env
+pg_db = PostgresHandler(config('PG_LINK'))
 
+# Инициализация клиента Telegram apps api (Telethon) и бота telegram api (aiogram) 
 client = TelegramClient('bot', api_id, api_hash)
 bot = Bot(token=bot_token)
 dp = Dispatcher(bot)
@@ -77,5 +79,18 @@ async def handle_chat_action(event):
   </a>
   <a href="https://github.com/tima03/SuperAdminBot/fork" target="_blank">
     <img src="https://img.shields.io/github/forks/tima03/SuperAdminBot?style=social" alt="GitHub forks"/>
+  </a>
+</p>
+
+<h2>Свяжитесь со мной</h2>
+<p align="center">
+  <a href="https://t.me/elka_micro" target="_blank">
+    <img src="https://img.icons8.com/color/48/000000/telegram-app.png" alt="Telegram"/>
+  </a>
+  <a href="https://vk.com/elkatsgirl" target="_blank">
+    <img src="https://img.icons8.com/color/48/000000/vk-com.png" alt="VK"/>
+  </a>
+  <a href="https://www.instagram.com/elka_ts" target="_blank">
+    <img src="https://img.icons8.com/color/48/000000/instagram-new.png" alt="Instagram"/>
   </a>
 </p>
