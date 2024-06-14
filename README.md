@@ -56,23 +56,23 @@ dp = Dispatcher(bot)
 
 @client.on(events.NewMessage(pattern='/start'))
 async def start(event):
-  await event.respond('Привет! Я SuperAdminBot. Как я могу помочь вам сегодня?')
-  raise events.StopPropagation
+    await event.respond('Привет! Я SuperAdminBot. Как я могу помочь вам сегодня?')
+    raise events.StopPropagation
 
 Обработка действий в чате:
 
 @client.on(events.ChatAction(chats='your_chat'))
 async def handle_chat_action(event):
-  if event.user_joined or event.user_left:
-    users = await client.get_participants('your_chat')
-    for user in users:
-      if user.username is None:
-        user.username = str(user.id)
-      permissions = await client.get_permissions(event.chat_id, user.id)
-      member = await bot.get_chat_member(event.chat_id, user.id)
-      is_admin = permissions.is_admin
-      is_muted = isinstance(member, ChatMemberRestricted)
-      is_banned = isinstance(member, ChatMemberBanned)
+    if event.user_joined or event.user_left:
+        users = await client.get_participants('your_chat')
+        for user in users:
+            if user.username is None:
+                user.username = str(user.id)
+            permissions = await client.get_permissions(event.chat_id, user.id)
+            member = await bot.get_chat_member(event.chat_id, user.id)
+            is_admin = permissions.is_admin
+            is_muted = isinstance(member, ChatMemberRestricted)
+            is_banned = isinstance(member, ChatMemberBanned)
 </code></pre>
 
 <h2>Поддержка</h2>
