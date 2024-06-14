@@ -1,6 +1,9 @@
+import re
 from telethon import TelegramClient, events
 import logging
 from decouple import config
+from telethon.tl.types import PeerUser
+
 from db_handler.db_class import PostgresHandler
 from aiogram import Bot, Dispatcher
 from aiogram.types import ChatMemberRestricted, ChatMemberBanned
@@ -112,9 +115,13 @@ async def handle_chat_action(event):
                     update_user_in_db(user.id, user.username, is_admin, is_muted, is_banned)
 
 
-@client.on(events.NewMessage(pattern='hello'))
-async def handler(event):
-    await event.reply('Hey!')
+@client.on(events.NewMessage(pattern=re.compile(r'-sms', re.IGNORECASE)))
+async def sms_delete(event):
+    user_id = event.message.to_dict()['from_id']['user_id']
+    permissions = await client.get_permissions(event.chat_id, user_id)
+    if permissions.is_admin:
+        await client.delete_messages(event.chat_id, event.message.reply_to_msg_id)
+        await client.delete_messages(event.chat_id, event.message.id)
 
 
 client.start()
