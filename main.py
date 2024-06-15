@@ -113,7 +113,7 @@ async def handle_chat_action(event):
                     update_user_in_db(user.id, user.username, is_admin, is_muted, is_banned)
 
 
-@client.on(events.NewMessage(pattern=re.compile(r'-sms', re.IGNORECASE)))
+@client.on(events.NewMessage(pattern=re.compile(r'^-sms$', re.IGNORECASE)))
 async def sms_delete(event):
     user_id = event.message.to_dict()['from_id']['user_id']
     permissions = await client.get_permissions(event.chat_id, user_id)
