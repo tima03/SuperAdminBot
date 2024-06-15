@@ -4,7 +4,7 @@ import logging
 from decouple import config
 from db_handler.db_class import PostgresHandler
 from aiogram import Bot, Dispatcher
-from aiogram.types import ChatMemberRestricted, ChatMemberBanned
+from aiogram.types import ChatMemberRestricted, ChatMemberBanned, ChatPermissions
 
 # Initialize the database handler
 pg_db = PostgresHandler(config('PG_LINK'))
@@ -122,6 +122,168 @@ async def sms_delete(event):
         await client.delete_messages(event.chat_id, event.message.id)
 
 
+# Обработчик команды mute при ответе на сообщение
+@client.on(events.NewMessage(pattern=re.compile(r'^(?!.*@)\bmute\b', re.IGNORECASE)))
+async def mute_user_reply(event):
+    user_id = event.message.to_dict()['from_id']['user_id']
+    permissions = await client.get_permissions(event.chat_id, user_id)
+
+    if permissions.is_admin and event.message.is_reply:
+        try:
+            reply_message = await event.get_reply_message()
+            user_replied_to_id = reply_message.from_id.user_id
+            user_replied_to = await client.get_entity(user_replied_to_id)
+
+            await bot.restrict_chat_member(
+                event.chat_id,
+                user_replied_to_id,
+                ChatPermissions(can_send_messages=False)
+            )
+            await event.respond(f"{user_replied_to.username or user_replied_to_id} is muted")
+        except Exception:
+            await event.respond("Такого пользователя нет в чате")
+    else:
+        await event.respond("Выберите пользователя для мьюта")
+
+
+# Обработчик команды unmute при ответе на сообщение
+@client.on(events.NewMessage(pattern=re.compile(r'^(?!.*@)\bunmute\b', re.IGNORECASE)))
+async def unmute_user_reply(event):
+    user_id = event.message.to_dict()['from_id']['user_id']
+    permissions = await client.get_permissions(event.chat_id, user_id)
+    if permissions.is_admin and event.message.is_reply:
+        try:
+            reply_message = await event.get_reply_message()
+            user_replied_to_id = reply_message.from_id.user_id
+            user_replied_to = await client.get_entity(user_replied_to_id)
+
+            await bot.restrict_chat_member(
+                event.chat_id,
+                user_replied_to_id,
+                ChatPermissions(can_send_messages=True)
+            )
+            await event.respond(f"{user_replied_to.username or user_replied_to_id} is unmuted")
+        except Exception:
+            await event.respond("Такого пользователя нет в чате")
+    else:
+        await event.respond("Выберите пользователя для анмьюта")
+
+
+@client.on(events.NewMessage(pattern=re.compile(r'^(?!.*@)\bban\b', re.IGNORECASE)))
+async def sms_delete(event):
+    user_id = event.message.to_dict()['from_id']['user_id']
+    permissions = await client.get_permissions(event.chat_id, user_id)
+    if permissions.is_admin and event.message.is_reply:
+        try:
+            reply_message = await event.get_reply_message()
+            user_replied_to_id = reply_message.from_id.user_id
+            user_replied_to = await client.get_entity(user_replied_to_id)
+
+            await bot.ban_chat_member(event.chat_id, user_replied_to_id)
+            await event.respond(user_replied_to.username + " is banned")
+        except Exception:
+            await event.respond("Такого пользователя нет в чате")
+    else:
+        await event.respond("Выберите пользователя для бана")
+
+
+@client.on(events.NewMessage(pattern=re.compile(r'^(?!.*@)\bunban\b', re.IGNORECASE)))
+async def sms_delete(event):
+    user_id = event.message.to_dict()['from_id']['user_id']
+    permissions = await client.get_permissions(event.chat_id, user_id)
+    if permissions.is_admin and event.message.is_reply:
+        try:
+            reply_message = await event.get_reply_message()
+            user_replied_to_id = reply_message.from_id.user_id
+            user_replied_to = await client.get_entity(user_replied_to_id)
+
+            await bot.unban_chat_member(event.chat_id, user_replied_to_id)
+            await event.respond(user_replied_to.username + " is unbanned")
+        except Exception:
+            await event.respond("Такого пользователя нет в чате")
+    else:
+        await event.respond("Выберите пользователя для бана")
+
+
+@client.on(events.NewMessage(pattern=re.compile(r'mute\s+@(\w+)', re.IGNORECASE)))
+async def mute_user(event):
+    user_id = event.message.to_dict()['from_id']['user_id']
+    permissions = await client.get_permissions(event.chat_id, user_id)
+
+    if permissions.is_admin:
+        find_nick_message = re.search(r'mute\s+@(\w+)', event.message.text, re.IGNORECASE)
+        if find_nick_message:
+            nick_message = find_nick_message.group(1)
+            if nick_message.isalnum():
+                if nick_message.isdigit():
+                    try:
+                        await bot.restrict_chat_member(
+                            event.chat_id,
+                            nick_message,
+                            ChatPermissions(can_send_messages=False)
+                        )
+                        await event.respond(f"{nick_message} is muted")
+                    except Exception:
+                        await event.respond("Видимо такого ника или id не существует")
+                else:
+                    try:
+                        user_to_mute = await client.get_entity(nick_message)
+                        await bot.restrict_chat_member(
+                            event.chat_id,
+                            user_to_mute.id,
+                            ChatPermissions(can_send_messages=False)
+                        )
+                        await event.respond(f"{nick_message} is muted")
+                    except Exception:
+                        await event.respond("Видимо такого ника или id не существует")
+            else:
+                await event.respond("Nickname can contain only letters and digits")
+        else:
+            await event.respond("No nickname found in the text")
+    else:
+        await event.respond("You don't have permission to mute users")
+
+
+# Пример функции unmute для снятия ограничения с пользователя
+@client.on(events.NewMessage(pattern=re.compile(r'unmute\s+@(\w+)', re.IGNORECASE)))
+async def unmute_user(event):
+    user_id = event.message.to_dict()['from_id']['user_id']
+    permissions = await client.get_permissions(event.chat_id, user_id)
+
+    if permissions.is_admin:
+        find_nick_message = re.search(r'unmute\s+@(\w+)', event.message.text, re.IGNORECASE)
+        if find_nick_message:
+            nick_message = find_nick_message.group(1)
+            if nick_message.isalnum():
+                if nick_message.isdigit():
+                    try:
+                        await bot.restrict_chat_member(
+                            event.chat_id,
+                            nick_message,
+                            ChatPermissions(can_send_messages=True)
+                        )
+                        await event.respond(f"{nick_message} is unmuted")
+                    except Exception:
+                        await event.respond("Видимо такого ника или id не существует")
+                else:
+                    try:
+                        user_to_unmute = await client.get_entity(nick_message)
+                        await bot.restrict_chat_member(
+                            event.chat_id,
+                            user_to_unmute.id,
+                            ChatPermissions(can_send_messages=True)
+                        )
+                        await event.respond(f"{nick_message} is unmuted")
+                    except Exception:
+                        await event.respond("Видимо такого ника или id не существует")
+            else:
+                await event.respond("Nickname can contain only letters and digits")
+        else:
+            await event.respond("No nickname found in the text")
+    else:
+        await event.respond("You don't have permission to unmute users")
+
+
 @client.on(events.NewMessage(pattern=re.compile(r'ban\s+@(\w+)', re.IGNORECASE)))
 async def sms_delete(event):
     user_id = event.message.to_dict()['from_id']['user_id']
@@ -149,39 +311,6 @@ async def sms_delete(event):
         else:
             await event.respond("No nickname found in the text")
 
-@client.on(events.NewMessage(pattern=re.compile(r'ban', re.IGNORECASE)))
-async def sms_delete(event):
-    user_id = event.message.to_dict()['from_id']['user_id']
-    permissions = await client.get_permissions(event.chat_id, user_id)
-    if permissions.is_admin and event.message.is_reply:
-        try:
-            reply_message = await event.get_reply_message()
-            user_replied_to_id = reply_message.from_id.user_id
-            user_replied_to = await client.get_entity(user_replied_to_id)
-
-            await bot.ban_chat_member(event.chat_id, user_replied_to_id)
-            await event.respond(user_replied_to.username + " is banned")
-        except Exception:
-            await event.respond("Такого пользователя нет в чате")
-    else:
-        await  event.respond("Выберите пользователя для бана")
-
-@client.on(events.NewMessage(pattern=re.compile(r'unban', re.IGNORECASE)))
-async def sms_delete(event):
-    user_id = event.message.to_dict()['from_id']['user_id']
-    permissions = await client.get_permissions(event.chat_id, user_id)
-    if permissions.is_admin and event.message.is_reply:
-        try:
-            reply_message = await event.get_reply_message()
-            user_replied_to_id = reply_message.from_id.user_id
-            user_replied_to = await client.get_entity(user_replied_to_id)
-
-            await bot.unban_chat_member(event.chat_id, user_replied_to_id)
-            await event.respond(user_replied_to.username + " is unbanned")
-        except Exception:
-            await event.respond("Такого пользователя нет в чате")
-    else:
-        await  event.respond("Выберите пользователя для бана")
 
 @client.on(events.NewMessage(pattern=re.compile(r'unban\s+@(\w+)', re.IGNORECASE)))
 async def sms_delete(event):
@@ -209,6 +338,7 @@ async def sms_delete(event):
                 await event.respond("Nickname can contain only latter's and digits")
         else:
             await event.respond("No nickname found in the text")
+
 
 client.start()
 client.run_until_disconnected()
