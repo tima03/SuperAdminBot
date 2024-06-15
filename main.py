@@ -5,6 +5,9 @@ from decouple import config
 from db_handler.db_class import PostgresHandler
 from aiogram import Bot, Dispatcher
 from aiogram.types import ChatMemberRestricted, ChatMemberBanned, ChatPermissions
+import time
+
+processed_events = {}
 
 # Initialize the database handler
 pg_db = PostgresHandler(config('PG_LINK'))
@@ -89,10 +92,26 @@ def insert_new_user_in_db(user_id, user_name, user_is_admin, user_is_muted, user
 async def handle_chat_action(event):
     if event.user_joined:
         user = await event.get_user()
-        await event.respond(f"Приветствуем тебя, {user.username or user.id}!")
-    if event.user_left:
+        if user.username is None:
+            logging.info(f"User {event.user_id} entered in the chat.")
+            await event.respond(f"Приветстуем тебя, {user.id}!")
+        else:
+            logging.info(f"User {event.user_id} entered in the chat.")
+            await event.respond(f"Приветстуем тебя, {user.username}!")
+    elif event.user_left or event.user_kicked:
+        event_id = (event.chat_id, event.user_id)
+        now = time.time()
+        if event_id in processed_events and (now - processed_events[event_id]) < 10:
+            print("Дублирование")
+            return
+        processed_events[event_id] = now
         user = await event.get_user()
-        await event.respond(f"Прощаемся с тобой, {user.username or user.id}!")
+        if user.username is None:
+            logging.info(f"User {event.user_id} left or was kicked from the chat.")
+            await event.respond(f"Прощаемся с тобой, {user.id}!")
+        else:
+            logging.info(f"User {event.user_id} left or was kicked from the chat.")
+            await event.respond(f"Прощаемся с тобой, {user.username}!")
     if event.user_joined or event.user_left:
         users = await client.get_participants(config('CHAT_NAME'))
         for user in users:
