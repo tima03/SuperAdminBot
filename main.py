@@ -151,6 +151,40 @@ async def sms_delete(event):
         else:
             await event.respond("No nickname found in the text")
 
+@client.on(events.NewMessage(pattern=re.compile(r'ban', re.IGNORECASE)))
+async def sms_delete(event):
+    user_id = event.message.to_dict()['from_id']['user_id']
+    permissions = await client.get_permissions(event.chat_id, user_id)
+    if permissions.is_admin and event.message.is_reply:
+        try:
+            reply_message = await event.get_reply_message()
+            user_replied_to_id = reply_message.from_id.user_id
+            user_replied_to = await client.get_entity(user_replied_to_id)
+
+            await bot.ban_chat_member(event.chat_id, user_replied_to_id)
+            await event.respond(user_replied_to.username + " is banned")
+        except Exception:
+            await event.respond("Такого пользователя нет в чате")
+    else:
+        await  event.respond("Выберите пользователя для бана")
+
+@client.on(events.NewMessage(pattern=re.compile(r'unban', re.IGNORECASE)))
+async def sms_delete(event):
+    user_id = event.message.to_dict()['from_id']['user_id']
+    permissions = await client.get_permissions(event.chat_id, user_id)
+    if permissions.is_admin and event.message.is_reply:
+        try:
+            reply_message = await event.get_reply_message()
+            user_replied_to_id = reply_message.from_id.user_id
+            user_replied_to = await client.get_entity(user_replied_to_id)
+
+            await bot.unban_chat_member(event.chat_id, user_replied_to_id)
+            await event.respond(user_replied_to.username + " is unbanned")
+        except Exception:
+            await event.respond("Такого пользователя нет в чате")
+    else:
+        await  event.respond("Выберите пользователя для бана")
+
 @client.on(events.NewMessage(pattern=re.compile(r'unban\s+@(\w+)', re.IGNORECASE)))
 async def sms_delete(event):
     user_id = event.message.to_dict()['from_id']['user_id']
