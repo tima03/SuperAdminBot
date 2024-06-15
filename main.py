@@ -2,8 +2,6 @@ import re
 from telethon import TelegramClient, events
 import logging
 from decouple import config
-from telethon.tl.types import PeerUser
-
 from db_handler.db_class import PostgresHandler
 from aiogram import Bot, Dispatcher
 from aiogram.types import ChatMemberRestricted, ChatMemberBanned
